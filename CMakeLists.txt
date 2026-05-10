@@ -12,4 +12,3 @@ add_executable(${APPLICATION_NAME} ${SOURCES})
 
 target_compile_options(${APPLICATION_NAME} PRIVATE -Wall -Wextra)
 
-target_include_directories(${APPLICATION_NAME} PRIVATE include)
