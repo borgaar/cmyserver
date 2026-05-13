@@ -14,25 +14,25 @@
 #define PORT 3000
 
 void handle_connection(int connection) {
-        unsigned int buff_size = 0;
-        char *header = malloc(buff_size);
+    unsigned int buff_size = 0;
+    char *header = malloc(buff_size);
 
-        read_header(connection, &header, buff_size);
+    read_header(connection, &header, buff_size);
 
-        printf("%s", header);
+    printf("%s", header);
 
-        unsigned int content_length = strlen(header);
+    unsigned int content_length = strlen(header);
 
-        char response[1024];
+    char response[1024];
 
-        snprintf(response, 1024, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\n%s", content_length, header);
+    snprintf(response, 1024, "HTTP/1.1 200 OK\r\nContent-Length: %d\r\nConnection: close\r\nContent-Type: text/plain\r\n\r\n%s", content_length, header);
 
-        send(connection, response, sizeof(response), 0);
+    send(connection, response, sizeof(response), 0);
 
-        free(header);
+    free(header);
 
-        shutdown(connection, SHUT_RDWR);
-        close(connection);
+    shutdown(connection, SHUT_RDWR);
+    close(connection);
 }
 
 int main() {
