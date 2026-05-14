@@ -1,7 +1,6 @@
 #include <stddef.h>
 typedef struct {
     size_t length;
-    _Bool freed;
 } DynArray;
 
 DynArray DynArray_new(size_t element_size);

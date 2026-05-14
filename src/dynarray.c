@@ -7,8 +7,8 @@
 
 typedef struct {
     size_t length;
-    _Bool freed;
      // end of struct definition in DynArray.h
+    _Bool freed;
     void *data;
     size_t cap_bytes;
     size_t elem_size;
