@@ -8,17 +8,20 @@
 typedef struct {
     size_t length;
      // end of struct definition in DynArray.h
-    _Bool freed;
-    void *data;
+    void *data; // is set to NULL pointer when freed to detect use after free etc.
     size_t cap_bytes;
     size_t elem_size;
 } DynArray;
 
-static void DynArray_resize(DynArray *arr, size_t new_byte_cap) {
-    if (arr->freed) {
-        perror("cannot resize a freed dynamic array");
+static void check_use_after_free(void* data, char* err_msg) {
+    if (data  == NULL) {
+        perror(err_msg);
         exit(EXIT_FAILURE);
     }
+};
+
+static void DynArray_resize(DynArray *arr, size_t new_byte_cap) {
+    check_use_after_free(arr->data, "cannot resize a freed dynamic array");
 
     void *tmp = realloc(arr->data, new_byte_cap);
 
@@ -38,16 +41,12 @@ DynArray DynArray_new(size_t element_size) {
     arr.length = 0;
     arr.cap_bytes = element_size * INIT_ARRAY_CAP;
     arr.elem_size = element_size;
-    arr.freed = 0;
 
     return arr;
 }
 
 void DynArray_push(DynArray *arr, void *restrict element) {
-    if (arr->freed) {
-        perror("cannot push to a freed dynamic array");
-        exit(EXIT_FAILURE);
-    }
+    check_use_after_free(arr->data, "cannot push to a freed dynamic array");
 
     // resize if necessary
     if (arr->length >= (arr->cap_bytes / arr->elem_size)) {
@@ -61,20 +60,14 @@ void DynArray_push(DynArray *arr, void *restrict element) {
 }
 
 void DynArray_free(DynArray *arr) {
-    if (arr->freed) {
-        perror("attempted double-freeing of a dynamic array");
-        exit(EXIT_FAILURE);
-    }
+    check_use_after_free(arr->data, "attempted double-freeing of a dynamic array");
 
     free(arr->data);
-    arr->freed = 1;
+    arr->data = NULL;
 }
 
 void DynArray_clear(DynArray *arr) {
-    if (arr->freed) {
-        perror("cannot clear a freed dynamic array");
-        exit(EXIT_FAILURE);
-    }
+    check_use_after_free(arr->data, "cannot clear a freed dynamic array");
 
     DynArray_resize(arr, INIT_ARRAY_CAP * arr->elem_size);
 
@@ -82,10 +75,7 @@ void DynArray_clear(DynArray *arr) {
 }
 
 void *DynArray_get(DynArray *arr, size_t n) {
-    if (arr->freed) {
-        perror("attempted accessing of freed dynamic array");
-        exit(EXIT_FAILURE);
-    }
+    check_use_after_free(arr->data, "attempted accessing of freed dynamic array");
 
     if (n >= arr->length) {
         perror("index out of bounds for dynamic array");
@@ -96,10 +86,7 @@ void *DynArray_get(DynArray *arr, size_t n) {
 }
 
 void DynArray_remove(DynArray *arr, size_t n) {
-    if (arr->freed) {
-        perror("attempted removing element from freed dynamic array");
-        exit(EXIT_FAILURE);
-    }
+    check_use_after_free(arr->data, "attempted removing element from freed dynamic array");
 
     if (n >= arr->length) {
         perror("index out of bounds for dynamic array");
