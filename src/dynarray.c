@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/param.h>
 
 #define INIT_ARRAY_CAP 4
 
@@ -26,12 +27,13 @@ static void DynArray_resize(DynArray *arr, size_t new_byte_cap) {
     void *tmp = realloc(arr->data, new_byte_cap);
 
     if (tmp == NULL) {
-        perror("failed to shrink dynamic array");
+        perror("failed to resize dynamic array");
         exit(EXIT_FAILURE);
     }
 
     arr->data = tmp;
     arr->cap_bytes = new_byte_cap;
+    arr->length = MIN(new_byte_cap / arr->elem_size, arr->length);
 }
 
 DynArray DynArray_new(size_t element_size) {
